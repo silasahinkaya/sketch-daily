@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Sketch Daily</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f1efe8;
+    color: #2c2c2a;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 460px; margin: 0 auto; padding: 20px 16px 60px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+  h2 { font-size: 16px; font-weight: 600; margin: 0 0 12px; }
+  p { line-height: 1.5; }
+  .muted { color: #888780; font-size: 13px; }
+  .card {
+    background: #fff; border-radius: 14px; border: 1px solid #e2e0d6;
+    padding: 18px; margin-bottom: 16px;
+  }
+  input, select {
+    width: 100%; height: 42px; border-radius: 8px; border: 1px solid #cfcdc2;
+    padding: 0 12px; font-size: 14px; margin-bottom: 10px; background: #fff;
+  }
+  button {
+    height: 42px; border-radius: 8px; border: 1px solid #cfcdc2;
+    background: #fff; font-size: 14px; cursor: pointer; padding: 0 14px;
+  }
+  button:hover { background: #f7f6f1; }
+  button.primary { background: #2c2c2a; color: #fff; border: none; }
+  button.primary:hover { background: #444441; }
+  button.danger { color: #a32d2d; border-color: #f0999599; }
+  button.chip {
+    border-radius: 20px; font-size: 13px; height: 36px; padding: 0 14px;
+  }
+  button.chip.active { background: #0c447c; color: #fff; border-color: #0c447c; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .tabbar {
+    display: flex; gap: 6px; margin-bottom: 18px; position: sticky; top: 0;
+    background: #f1efe8; padding: 12px 0; z-index: 5;
+  }
+  .tabbar button { flex: 1; border-radius: 10px; }
+  .tabbar button.active { background: #2c2c2a; color: #fff; border-color: #2c2c2a; }
+  .hidden { display: none !important; }
+  .pill {
+    display: inline-block; background: #e6f1fb; color: #0c447c;
+    font-size: 13px; font-weight: 500; padding: 5px 12px; border-radius: 8px; margin: 2px 4px 2px 0;
+  }
+  .streak {
+    display: inline-flex; align-items: center; gap: 6px; background: #faeeda;
+    color: #854f0b; padding: 5px 12px; border-radius: 8px; font-size: 13px; font-weight: 500;
+  }
+  .timer { text-align: center; font-size: 40px; font-weight: 600; margin: 18px 0; }
+  .pool-item {
+    display: flex; align-items: center; gap: 8px; padding: 8px 0;
+    border-bottom: 1px solid #eeece3; font-size: 13px;
+  }
+  .pool-item span { flex: 1; word-break: break-word; }
+  .pool-item button { height: 30px; padding: 0 10px; font-size: 12px; }
+  .img-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .img-tile { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: #f1efe8; }
+  .img-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .img-tile button {
+    position: absolute; top: 4px; right: 4px; height: 22px; width: 22px; padding: 0;
+    font-size: 11px; line-height: 1; border-radius: 6px; background: #fff;
+  }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 16px; }
+  .cal-label { font-size: 11px; color: #888780; text-align: center; }
+  .cal-cell {
+    aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; border-radius: 6px; color: #b4b2a9; cursor: default;
+  }
+  .cal-cell.done { background: #eaf3de; color: #27500a; font-weight: 500; cursor: pointer; }
+  .cal-cell.today { border: 1.5px solid #378add; }
+  .session {
+    background: #f7f6f1; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; font-size: 13px;
+  }
+  .session .meta { color: #888780; font-size: 11px; margin-top: 4px; }
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.45); display: flex; align-items: center;
+    justify-content: center; z-index: 50; padding: 20px;
+  }
+  .modal-box {
+    background: #fff; border-radius: 14px; padding: 20px; max-width: 380px;
+    width: 100%; max-height: 80vh; overflow-y: auto;
+  }
+  .modal-box img { width: 100%; border-radius: 8px; margin-bottom: 10px; }
+  .modal-close { float: right; height: 30px; width: 30px; padding: 0; border-radius: 8px; }
+  .err { color: #a32d2d; font-size: 13px; margin: 8px 0; min-height: 16px; }
+  .center { text-align: center; }
+  label.small { font-size: 12px; color: #888780; display:block; margin: 12px 0 6px; }
+  a { color: #185fa5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="login-screen">
+    <h1>Sketch Daily</h1>
+    <p class="muted">Çizim pratiği için günlük atama uygulaman.</p>
+    <div class="card">
+      <label class="small">E-posta</label>
+      <input type="email" id="login-email" placeholder="ornek@mail.com">
+      <label class="small">Şifre</label>
+      <input type="password" id="login-pass" placeholder="••••••••">
+      <div class="err" id="login-err"></div>
+      <button class="primary" style="width:100%" onclick="doLogin()">Giriş yap</button>
+    </div>
+  </div>
+
+  <div id="app-screen" class="hidden">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+      <h1>Sketch Daily</h1>
+      <button onclick="doLogout()" style="height:32px; font-size:12px;">Çıkış</button>
+    </div>
+
+    <div class="tabbar">
+      <button id="tab-btn-home" class="active" onclick="showTab('home')">Ana ekran</button>
+      <button id="tab-btn-pools" onclick="showTab('pools')">Havuzlar</button>
+      <button id="tab-btn-cal" onclick="showTab('cal')">Takvim</button>
+    </div>
+
+    <div id="tab-home">
+      <div class="card center">
+        <span class="streak" id="streak-badge">🔥 0 gün</span>
+      </div>
+
+      <div class="card">
+        <h2>Süre</h2>
+        <div class="row" id="duration-row"></div>
+      </div>
+
+      <div class="card">
+        <h2>Konu</h2>
+        <div class="row" id="subject-row"></div>
+      </div>
+
+      <div class="card">
+        <h2>Stil</h2>
+        <div class="row" id="style-row"></div>
+      </div>
+
+      <button class="primary" style="width:100%" onclick="generateAssignment()">Atama oluştur</button>
+
+      <div class="card hidden" id="assignment-card" style="margin-top:16px;">
+        <h2>Bugünkü çizim</h2>
+        <div id="assignment-subject"></div>
+        <div id="assignment-style" style="margin-top:10px;"></div>
+        <div class="timer" id="timer-display">--:--</div>
+        <div class="grid2">
+          <button onclick="generateAssignment()">↻ Yeniden ata</button>
+          <button class="primary" onclick="toggleTimer()" id="timer-btn">▶ Başlat</button>
+        </div>
+        <button style="width:100%; margin-top:8px;" onclick="saveSession()">✓ Bitirdim, kaydet</button>
+      </div>
+    </div>
+
+    <div id="tab-pools" class="hidden">
+      <div class="card">
+        <h2>Referans görselleri</h2>
+        <p class="muted">Bilgisayarına/telefonuna indirdiğin görselleri seç, otomatik küçültülüp yüklenir.</p>
+        <input type="file" id="pool-references-file" accept="image/*" multiple>
+        <div class="muted" id="pool-references-status" style="margin-bottom:8px;"></div>
+        <div class="img-grid" id="pool-references-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Stil görselleri</h2>
+        <p class="muted">Denemek istediğin stillerden görselleri seç.</p>
+        <input type="file" id="pool-styles-file" accept="image/*" multiple>
+        <div class="muted" id="pool-styles-status" style="margin-bottom:8px;"></div>
+        <div class="img-grid" id="pool-styles-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Çevresel gözlem komutları</h2>
+        <div class="row">
+          <input type="text" id="pool-env-input" placeholder="ör. en yakınındaki ağacı çiz" style="flex:1; margin-bottom:0;">
+          <button onclick="addPoolItem('env')">Ekle</button>
+        </div>
+        <div id="pool-env-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Telefon referans kategorileri</h2>
+        <div class="row">
+          <input type="text" id="pool-phone-input" placeholder="ör. bir doğa fotoğrafı" style="flex:1; margin-bottom:0;">
+          <button onclick="addPoolItem('phone')">Ekle</button>
+        </div>
+        <div id="pool-phone-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Kelime havuzu — soyut</h2>
+        <div class="row">
+          <input type="text" id="pool-wordsAbstract-input" placeholder="ör. yalnızlık" style="flex:1; margin-bottom:0;">
+          <button onclick="addPoolItem('wordsAbstract')">Ekle</button>
+        </div>
+        <div id="pool-wordsAbstract-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Kelime havuzu — somut</h2>
+        <div class="row">
+          <input type="text" id="pool-wordsConcrete-input" placeholder="ör. ördek" style="flex:1; margin-bottom:0;">
+          <button onclick="addPoolItem('wordsConcrete')">Ekle</button>
+        </div>
+        <div id="pool-wordsConcrete-list"></div>
+      </div>
+    </div>
+
+    <div id="tab-cal" class="hidden">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h2 style="margin:0;" id="cal-month-label"></h2>
+          <span class="streak" id="streak-badge-2">🔥 0 gün</span>
+        </div>
+        <div class="cal-grid" id="cal-labels">
+          <span class="cal-label">P</span><span class="cal-label">P</span><span class="cal-label">S</span>
+          <span class="cal-label">Ç</span><span class="cal-label">P</span><span class="cal-label">C</span><span class="cal-label">C</span>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+      <div class="card">
+        <h2>Son seanslar</h2>
+        <div id="session-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="day-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeDayDetail()">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeDayDetail()">✕</button>
+      <div id="day-modal-content"></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.7.1/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.7.1/firebase-auth-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.7.1/firebase-firestore-compat.min.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDLt8OPtmNVPGf0X3B0iccSLPkssdjBf8Y",
+  authDomain: "sketch-daily-34a1c.firebaseapp.com",
+  projectId: "sketch-daily-34a1c",
+  storageBucket: "sketch-daily-34a1c.firebasestorage.app",
+  messagingSenderId: "722824243869",
+  appId: "1:722824243869:web:a6b4457662137ee547c274"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let uid = null;
+let pools = { env: [], phone: [], wordsAbstract: [], wordsConcrete: [] };
+let imagePools = { references: [], styles: [] };
+const defaults = {
+  env: ["En yakınındaki ağacı çiz","Şu an oturduğun sandalyeyi/koltuğu çiz","Elindeki telefonu çiz","Pencereden gördüğün ilk şeyi çiz","Ayakkabılarını çiz","Masandaki en ilginç nesneyi çiz","Bir bitkiyi çiz","Duvardaki bir gölgeyi çiz","Mutfaktaki bir eşyayı çiz","En yakınındaki ışık kaynağını çiz","Çantandaki/cebindeki bir eşyayı çiz","Bir kapı kolunu ya da anahtarlığı çiz","Bardağını ya da fincanını çiz","Dışarıdan geçen bir insanı hızlıca çiz","Bir kitabın kapağını çiz","Yerdeki bir dokuyu/deseni çiz","En yakınındaki elektronik cihazı çiz","Bir yaprağı yakından çiz","Kendi elini çiz","Aynadaki yansımanı çiz"],
+  phone: ["Son çektiğin insanlı bir fotoğraf","Bir doğa/manzara fotoğrafı","Bir mimari/yapı fotoğrafı","Bir hayvan fotoğrafı","Bir yemek fotoğrafı","Bir araç fotoğrafı","Gece çekilmiş bir fotoğraf","Bir obje/still-life fotoğrafı","Kalabalık/sokak fotoğrafı","Galerindeki en eski fotoğraflardan biri"],
+  wordsAbstract: ["yalnızlık","hız","bekleyiş","özgürlük","kaos","denge","nostalji","kırılganlık","güç","sessizlik","dönüşüm","kayıp","umut","korku","huzur","çatışma","büyüme","izolasyon","bağlantı","zaman","ağırlık","hafiflik","gölge","ışık","döngü","sınır","geçiş","tekrar","boşluk","keşif"],
+  wordsConcrete: ["ördek","saat","anahtar","merdiven","pencere","şemsiye","kuş kafesi","ayna","kırık bardak","boş sandalye","telefon kulübesi","deniz feneri","trafik ışığı","salıncak","kapı","köprü","tren istasyonu","balon","mum","kitap yığını","gemi","ağaç kütüğü","çadır","tek ayakkabı","saksı","karton kutu","kapı altından sızan ışık","boş sokak","yağmur damlası","kuş sürüsü"]
+};
+const MAX_DIM = 1400;
+const JPEG_QUALITY = 0.8;
+
+let selectedDuration = null;
+let selectedSubjectType = null;
+let selectedStyleType = null;
+let currentAssignment = null;
+let timerInterval = null;
+let secondsLeft = 0;
+let timerRunning = false;
+
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  document.getElementById('login-err').textContent = '';
+  auth.signInWithEmailAndPassword(email, pass).catch(function(e) {
+    document.getElementById('login-err').textContent = 'Giriş başarısız: ' + e.message;
+  });
+}
+function doLogout() { auth.signOut(); }
+
+auth.onAuthStateChanged(function(user) {
+  if (user) {
+    uid = user.uid;
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('app-screen').classList.remove('hidden');
+    initApp();
+  } else {
+    uid = null;
+    document.getElementById('login-screen').classList.remove('hidden');
+    document.getElementById('app-screen').classList.add('hidden');
+  }
+});
+
+function poolsDocRef() { return db.collection('users').doc(uid).collection('data').doc('pools'); }
+function sessionsRef() { return db.collection('users').doc(uid).collection('sessions'); }
+function imageColRef(key) { return db.collection('users').doc(uid).collection(key === 'references' ? 'referenceImages' : 'styleImages'); }
+
+async function initApp() {
+  const snap = await poolsDocRef().get();
+  if (snap.exists) {
+    const data = snap.data();
+    pools = { env: data.env || defaults.env, phone: data.phone || defaults.phone, wordsAbstract: data.wordsAbstract || defaults.wordsAbstract, wordsConcrete: data.wordsConcrete || defaults.wordsConcrete };
+  } else {
+    pools = JSON.parse(JSON.stringify(defaults));
+    await poolsDocRef().set(pools);
+  }
+  await loadImagePool('references');
+  await loadImagePool('styles');
+  renderPools();
+  renderImagePool('references');
+  renderImagePool('styles');
+  renderDurationRow();
+  renderSubjectRow();
+  renderStyleRow();
+  await renderStreakAndCalendar();
+
+  document.getElementById('pool-references-file').addEventListener('change', function(e) { handleFiles('references', e.target.files); });
+  document.getElementById('pool-styles-file').addEventListener('change', function(e) { handleFiles('styles', e.target.files); });
+}
+
+async function savePools() { await poolsDocRef().set(pools); }
+
+function renderPools() {
+  ['env','phone','wordsAbstract','wordsConcrete'].forEach(function(key) {
+    const list = document.getElementById('pool-' + key + '-list');
+    list.innerHTML = '';
+    (pools[key] || []).forEach(function(item, idx) {
+      const div = document.createElement('div');
+      div.className = 'pool-item';
+      const span = document.createElement('span');
+      span.textContent = item;
+      const btn = document.createElement('button');
+      btn.className = 'danger';
+      btn.textContent = 'Sil';
+      btn.onclick = function() { removePoolItem(key, idx); };
+      div.appendChild(span);
+      div.appendChild(btn);
+      list.appendChild(div);
+    });
+  });
+}
+function addPoolItem(key) {
+  const input = document.getElementById('pool-' + key + '-input');
+  const val = input.value.trim();
+  if (!val) return;
+  pools[key].push(val);
+  input.value = '';
+  renderPools();
+  savePools();
+}
+function removePoolItem(key, idx) {
+  pools[key].splice(idx, 1);
+  renderPools();
+  savePools();
+}
+
+async function loadImagePool(key) {
+  const snap = await imageColRef(key).orderBy('createdAt', 'desc').get();
+  imagePools[key] = [];
+  snap.forEach(function(doc) { imagePools[key].push({ id: doc.id, data: doc.data().data }); });
+}
+
+function renderImagePool(key) {
+  const list = document.getElementById('pool-' + key + '-list');
+  list.innerHTML = '';
+  imagePools[key].forEach(function(item) {
+    const tile = document.createElement('div');
+    tile.className = 'img-tile';
+    const img = document.createElement('img');
+    img.src = item.data;
+    const btn = document.createElement('button');
+    btn.textContent = '✕';
+    btn.onclick = function() { removeImageItem(key, item.id); };
+    tile.appendChild(img);
+    tile.appendChild(btn);
+    list.appendChild(tile);
+  });
+}
+
+async function removeImageItem(key, id) {
+  await imageColRef(key).doc(id).delete();
+  imagePools[key] = imagePools[key].filter(function(i) { return i.id !== id; });
+  renderImagePool(key);
+}
+
+function resizeImageFile(file) {
+  return new Promise(function(resolve, reject) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        let w = img.width, h = img.height;
+        if (w > MAX_DIM || h > MAX_DIM) {
+          if (w > h) { h = Math.round(h * MAX_DIM / w); w = MAX_DIM; }
+          else { w = Math.round(w * MAX_DIM / h); h = MAX_DIM; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', JPEG_QUALITY));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleFiles(key, files) {
+  const status = document.getElementById('pool-' + key + '-status');
+  const arr = Array.from(files);
+  for (let i = 0; i < arr.length; i++) {
+    status.textContent = 'Yükleniyor ' + (i + 1) + '/' + arr.length + '...';
+    try {
+      const dataUrl = await resizeImageFile(arr[i]);
+      const docRef = await imageColRef(key).add({ data: dataUrl, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      imagePools[key].unshift({ id: docRef.id, data: dataUrl });
+    } catch (err) {
+      status.textContent = 'Hata: ' + err.message;
+    }
+  }
+  status.textContent = '';
+  renderImagePool(key);
+  document.getElementById('pool-' + key + '-file').value = '';
+}
+
+const durations = [{v:5,l:'5 dk'},{v:15,l:'15 dk'},{v:30,l:'30 dk'},{v:60,l:'1 saat'},{v:'r',l:'Rastgele'}];
+function renderDurationRow() {
+  const row = document.getElementById('duration-row');
+  row.innerHTML = '';
+  durations.forEach(function(d) {
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.textContent = d.l;
+    b.onclick = function() { selectedDuration = d.v; renderDurationRow(); };
+    if (selectedDuration === d.v) b.classList.add('active');
+    row.appendChild(b);
+  });
+}
+
+const subjectTypes = [
+  {v:'env', l:'Etrafı keşfet'}, {v:'ref', l:'Var olan referans'}, {v:'phone', l:'Telefondan'},
+  {v:'word', l:'Kelime/tema'}, {v:'self', l:'Kendin seç'}, {v:'random', l:'Random'}
+];
+function renderSubjectRow() {
+  const row = document.getElementById('subject-row');
+  row.innerHTML = '';
+  subjectTypes.forEach(function(s) {
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.textContent = s.l;
+    b.onclick = function() { selectedSubjectType = s.v; renderSubjectRow(); };
+    if (selectedSubjectType === s.v) b.classList.add('active');
+    row.appendChild(b);
+  });
+}
+
+const styleTypes = [
+  {v:'single', l:'Görsel ata'}, {v:'combo', l:'Kombin (2)'}, {v:'free', l:'Serbest'}, {v:'random', l:'Random'}
+];
+function renderStyleRow() {
+  const row = document.getElementById('style-row');
+  row.innerHTML = '';
+  styleTypes.forEach(function(s) {
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.textContent = s.l;
+    b.onclick = function() { selectedStyleType = s.v; renderStyleRow(); };
+    if (selectedStyleType === s.v) b.classList.add('active');
+    row.appendChild(b);
+  });
+}
+
+function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function generateAssignment() {
+  if (!selectedDuration) { alert('Önce bir süre seç.'); return; }
+  if (!selectedSubjectType) { alert('Önce bir konu tipi seç.'); return; }
+  if (!selectedStyleType) { alert('Önce bir stil tipi seç.'); return; }
+
+  let duration = selectedDuration;
+  if (duration === 'r') duration = pickRandom([5,15,30,60]);
+
+  let subjectType = selectedSubjectType;
+  if (subjectType === 'random') subjectType = pickRandom(['env','ref','phone','word','self']);
+
+  let subjectResult = { type: subjectType, text: '', imageUrl: null };
+  if (subjectType === 'env') {
+    subjectResult.text = pools.env.length ? pickRandom(pools.env) : 'Havuz boş — Havuzlar sekmesinden ekle.';
+  } else if (subjectType === 'ref') {
+    if (imagePools.references.length) subjectResult.imageUrl = pickRandom(imagePools.references).data;
+    else subjectResult.text = 'Referans havuzu boş — Havuzlar sekmesinden ekle.';
+  } else if (subjectType === 'phone') {
+    subjectResult.text = pools.phone.length ? pickRandom(pools.phone) : 'Havuz boş — Havuzlar sekmesinden ekle.';
+  } else if (subjectType === 'word') {
+    const combinedPool = [];
+    pools.wordsAbstract.forEach(function(w){ combinedPool.push(w); });
+    pools.wordsConcrete.forEach(function(w){ combinedPool.push(w); });
+    if (combinedPool.length) {
+      const n = Math.floor(Math.random() * 3) + 1;
+      const shuffled = combinedPool.slice().sort(function(){ return 0.5 - Math.random(); });
+      subjectResult.text = shuffled.slice(0, Math.min(n, shuffled.length)).join(' + ');
+    } else {
+      subjectResult.text = 'Kelime havuzu boş — Havuzlar sekmesinden ekle.';
+    }
+  } else if (subjectType === 'self') {
+    subjectResult.text = 'Bugün ne çizeceğine sen karar ver.';
+  }
+
+  let styleType = selectedStyleType;
+  if (styleType === 'random') styleType = pickRandom(['single','combo','free']);
+  let styleResult = { type: styleType, images: [] };
+  if (styleType === 'single') {
+    if (imagePools.styles.length) styleResult.images = [pickRandom(imagePools.styles).data];
+  } else if (styleType === 'combo') {
+    if (imagePools.styles.length >= 2) {
+      const shuffled = imagePools.styles.slice().sort(function(){ return 0.5 - Math.random(); });
+      styleResult.images = [shuffled[0].data, shuffled[1].data];
+    } else if (imagePools.styles.length === 1) {
+      styleResult.images = [imagePools.styles[0].data];
+    }
+  }
+
+  currentAssignment = { duration: duration, subject: subjectResult, style: styleResult };
+  renderAssignment();
+}
+
+function renderAssignment() {
+  document.getElementById('assignment-card').classList.remove('hidden');
+  const subjDiv = document.getElementById('assignment-subject');
+  subjDiv.innerHTML = '';
+  if (currentAssignment.subject.imageUrl) {
+    const img = document.createElement('img');
+    img.src = currentAssignment.subject.imageUrl;
+    img.style.width = '100%';
+    img.style.borderRadius = '8px';
+    subjDiv.appendChild(img);
+  } else {
+    const p = document.createElement('p');
+    p.innerHTML = '<span class="pill">' + currentAssignment.subject.text + '</span>';
+    subjDiv.appendChild(p);
+  }
+
+  const styleDiv = document.getElementById('assignment-style');
+  styleDiv.innerHTML = '';
+  if (currentAssignment.style.images.length) {
+    currentAssignment.style.images.forEach(function(url) {
+      const img = document.createElement('img');
+      img.src = url;
+      img.style.width = '48%';
+      img.style.marginRight = '4%';
+      img.style.borderRadius = '8px';
+      styleDiv.appendChild(img);
+    });
+  } else if (currentAssignment.style.type === 'free') {
+    styleDiv.innerHTML = '<span class="muted">Stil serbest.</span>';
+  } else {
+    styleDiv.innerHTML = '<span class="muted">Stil havuzu boş — Havuzlar sekmesinden ekle.</span>';
+  }
+
+  secondsLeft = currentAssignment.duration * 60;
+  timerRunning = false;
+  clearInterval(timerInterval);
+  updateTimerDisplay();
+  document.getElementById('timer-btn').textContent = '▶ Başlat';
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(secondsLeft / 60);
+  const s = secondsLeft % 60;
+  document.getElementById('timer-display').textContent =
+    (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+}
+function toggleTimer() {
+  if (timerRunning) {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    document.getElementById('timer-btn').textContent = '▶ Başlat';
+  } else {
+    timerRunning = true;
+    document.getElementById('timer-btn').textContent = '⏸ Durdur';
+    timerInterval = setInterval(function() {
+      if (secondsLeft > 0) {
+        secondsLeft--;
+        updateTimerDisplay();
+      } else {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        document.getElementById('timer-btn').textContent = '▶ Başlat';
+      }
+    }, 1000);
+  }
+}
+
+async function saveSession() {
+  if (!currentAssignment) return;
+  clearInterval(timerInterval);
+  const now = new Date();
+  const dateStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+  await sessionsRef().add({
+    date: dateStr,
+    duration: currentAssignment.duration,
+    subjectType: currentAssignment.subject.type,
+    subjectText: currentAssignment.subject.text || '',
+    subjectImage: currentAssignment.subject.imageUrl || null,
+    styleType: currentAssignment.style.type,
+    styleImages: currentAssignment.style.images,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  document.getElementById('assignment-card').classList.add('hidden');
+  currentAssignment = null;
+  await renderStreakAndCalendar();
+  showTab('cal');
+}
+
+function showTab(name) {
+  ['home','pools','cal'].forEach(function(t) {
+    document.getElementById('tab-' + t).classList.toggle('hidden', t !== name);
+    document.getElementById('tab-btn-' + (t === 'cal' ? 'cal' : t)).classList.toggle('active', t === name);
+  });
+  if (name === 'cal') renderStreakAndCalendar();
+}
+
+async function renderStreakAndCalendar() {
+  const snap = await sessionsRef().orderBy('date', 'desc').limit(200).get();
+  const sessions = [];
+  snap.forEach(function(doc) { sessions.push(doc.data()); });
+
+  const sessionsByDate = {};
+  sessions.forEach(function(s) {
+    if (!sessionsByDate[s.date]) sessionsByDate[s.date] = [];
+    sessionsByDate[s.date].push(s);
+  });
+  window._sessionsByDate = sessionsByDate;
+
+  const doneDates = new Set(sessions.map(function(s) { return s.date; }));
+  let streak = 0;
+  let cursor = new Date();
+  while (true) {
+    const ds = cursor.getFullYear() + '-' + String(cursor.getMonth()+1).padStart(2,'0') + '-' + String(cursor.getDate()).padStart(2,'0');
+    if (doneDates.has(ds)) {
+      streak++;
+      cursor.setDate(cursor.getDate() - 1);
+    } else break;
+  }
+  const streakText = '🔥 ' + streak + ' gün';
+  document.getElementById('streak-badge').textContent = streakText;
+  document.getElementById('streak-badge-2').textContent = streakText;
+
+  const now = new Date();
+  const monthNames = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  document.getElementById('cal-month-label').textContent = monthNames[now.getMonth()] + ' ' + now.getFullYear();
+
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+  let startOffset = firstDay.getDay() - 1;
+  if (startOffset < 0) startOffset = 6;
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  for (let i = 0; i < startOffset; i++) grid.appendChild(document.createElement('div'));
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell';
+    if (doneDates.has(ds)) {
+      cell.className += ' done';
+      cell.onclick = (function(dateStr) { return function() { showDayDetail(dateStr); }; })(ds);
+    }
+    if (d === now.getDate()) cell.className += ' today';
+    cell.textContent = d;
+    grid.appendChild(cell);
+  }
+
+  const list = document.getElementById('session-list');
+  list.innerHTML = '';
+  sessions.slice(0, 15).forEach(function(s) {
+    const div = document.createElement('div');
+    div.className = 'session';
+    div.style.cursor = 'pointer';
+    const subj = s.subjectText || (s.subjectImage ? 'Referans görseli' : '');
+    div.innerHTML = '<div>' + subj + '</div><div class="meta">' + s.date + ' · ' + s.duration + ' dk</div>';
+    div.onclick = function() { showDayDetail(s.date); };
+    list.appendChild(div);
+  });
+}
+
+function showDayDetail(dateStr) {
+  const sessions = (window._sessionsByDate && window._sessionsByDate[dateStr]) || [];
+  if (!sessions.length) return;
+  const content = document.getElementById('day-modal-content');
+  content.innerHTML = '';
+  const title = document.createElement('h3');
+  title.textContent = dateStr;
+  title.style.marginTop = '0';
+  content.appendChild(title);
+
+  sessions.forEach(function(s) {
+    const block = document.createElement('div');
+    block.style.marginBottom = '16px';
+    block.style.paddingBottom = '16px';
+    block.style.borderBottom = '1px solid #eeece3';
+
+    const meta = document.createElement('p');
+    meta.className = 'meta';
+    meta.textContent = s.duration + ' dk';
+    block.appendChild(meta);
+
+    const subjLabel = document.createElement('p');
+    subjLabel.className = 'subhead';
+    subjLabel.textContent = 'Konu';
+    block.appendChild(subjLabel);
+    if (s.subjectImage) {
+      const img = document.createElement('img');
+      img.src = s.subjectImage;
+      block.appendChild(img);
+    } else {
+      const p = document.createElement('p');
+      p.innerHTML = '<span class="pill">' + (s.subjectText || '-') + '</span>';
+      block.appendChild(p);
+    }
+
+    if (s.styleImages && s.styleImages.length) {
+      const styleLabel = document.createElement('p');
+      styleLabel.className = 'subhead';
+      styleLabel.textContent = 'Stil';
+      block.appendChild(styleLabel);
+      const row = document.createElement('div');
+      row.className = 'row';
+      s.styleImages.forEach(function(url) {
+        const img = document.createElement('img');
+        img.src = url;
+        img.style.width = '48%';
+        row.appendChild(img);
+      });
+      block.appendChild(row);
+    } else if (s.styleType === 'free') {
+      const p = document.createElement('p');
+      p.className = 'muted';
+      p.textContent = 'Stil serbest.';
+      block.appendChild(p);
+    }
+    content.appendChild(block);
+  });
+
+  document.getElementById('day-modal').classList.remove('hidden');
+}
+function closeDayDetail() {
+  document.getElementById('day-modal').classList.add('hidden');
+}
+</script>
+</body>
+</html>
