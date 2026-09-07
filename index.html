@@ -221,6 +221,7 @@
           <h2 style="margin:0;" id="cal-month-label"></h2>
           <span class="streak" id="streak-badge-2">🔥 0 gün</span>
         </div>
+        <button style="width:100%; margin-bottom:12px;" onclick="openManualLog()">+ Manuel kayıt ekle</button>
         <div class="cal-grid" id="cal-labels">
           <span class="cal-label">P</span><span class="cal-label">P</span><span class="cal-label">S</span>
           <span class="cal-label">Ç</span><span class="cal-label">P</span><span class="cal-label">C</span><span class="cal-label">C</span>
@@ -238,6 +239,24 @@
     <div class="modal-box">
       <button class="modal-close" onclick="closeDayDetail()">✕</button>
       <div id="day-modal-content"></div>
+    </div>
+  </div>
+
+  <div id="manual-log-modal" class="modal-overlay hidden" onclick="if(event.target===this) closeManualLog()">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeManualLog()">✕</button>
+      <h3 style="margin-top:0;">Manuel kayıt ekle</h3>
+      <p class="muted">Uygulama üzerinden atama almadan yaptığın bir çizimi buradan kaydedebilirsin.</p>
+      <label class="small">Tarih</label>
+      <input type="date" id="manual-date">
+      <label class="small">Süre (dk)</label>
+      <input type="number" id="manual-duration" placeholder="ör. 20" min="1">
+      <label class="small">Ne çizdin?</label>
+      <input type="text" id="manual-subject" placeholder="ör. kedi, sokak manzarası...">
+      <label class="small">Stil / not (opsiyonel)</label>
+      <input type="text" id="manual-style" placeholder="ör. karakalem, hızlı taslak...">
+      <div class="err" id="manual-err"></div>
+      <button class="primary" style="width:100%" onclick="saveManualSession()">Kaydet</button>
     </div>
   </div>
 
@@ -750,6 +769,16 @@ function showDayDetail(dateStr) {
       p.className = 'muted';
       p.textContent = 'Stil serbest.';
       block.appendChild(p);
+    } else if (s.styleType === 'manual' && s.styleNote) {
+      const p = document.createElement('p');
+      p.innerHTML = '<span class="pill">' + s.styleNote + '</span>';
+      block.appendChild(p);
+    }
+    if (s.manual) {
+      const tag = document.createElement('p');
+      tag.className = 'muted';
+      tag.textContent = '✎ manuel kayıt';
+      block.appendChild(tag);
     }
     content.appendChild(block);
   });
@@ -758,6 +787,45 @@ function showDayDetail(dateStr) {
 }
 function closeDayDetail() {
   document.getElementById('day-modal').classList.add('hidden');
+}
+
+function openManualLog() {
+  const today = new Date();
+  const ds = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  document.getElementById('manual-date').value = ds;
+  document.getElementById('manual-duration').value = '';
+  document.getElementById('manual-subject').value = '';
+  document.getElementById('manual-style').value = '';
+  document.getElementById('manual-err').textContent = '';
+  document.getElementById('manual-log-modal').classList.remove('hidden');
+}
+function closeManualLog() {
+  document.getElementById('manual-log-modal').classList.add('hidden');
+}
+async function saveManualSession() {
+  const date = document.getElementById('manual-date').value;
+  const duration = parseInt(document.getElementById('manual-duration').value, 10);
+  const subject = document.getElementById('manual-subject').value.trim();
+  const style = document.getElementById('manual-style').value.trim();
+  const err = document.getElementById('manual-err');
+  if (!date) { err.textContent = 'Tarih seçmen gerekiyor.'; return; }
+  if (!duration || duration <= 0) { err.textContent = 'Geçerli bir süre gir.'; return; }
+  if (!subject) { err.textContent = 'Ne çizdiğini yazman gerekiyor.'; return; }
+
+  await sessionsRef().add({
+    date: date,
+    duration: duration,
+    subjectType: 'manual',
+    subjectText: subject,
+    subjectImage: null,
+    styleType: 'manual',
+    styleImages: [],
+    styleNote: style || '',
+    manual: true,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  closeManualLog();
+  await renderStreakAndCalendar();
 }
 </script>
 </body>
